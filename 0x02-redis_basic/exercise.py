@@ -6,6 +6,16 @@ import uuid
 import redis
 from functools import wraps
 
+def replay(method):
+    key = method.__qualname__
+    _redis = redis.Redis()
+    count = _redis.get(key)
+    print(f"{key} was called {count.decode('utf-8')} times:")
+    inputs = _redis.lrange(f"{key}:inputs", 0, -1)
+    outputs = _redis.lrange(f"{key}:outputs", 0, -1)
+    for inz, outz in zip(inputs, outputs):
+        print(f"{key}(*{inz.decode('utf-8')}) -> {outz.decode('utf-8')}")
+
 def count_calls(method: Callable) -> Callable:
     """
     Count the ammount of calls made to a method
