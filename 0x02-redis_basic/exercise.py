@@ -64,13 +64,14 @@ class Cache:
         self._redis.set(key, data)
         return key
 
-    def get(self, key: str, fn: Optional[Callable] = None) -> Union[str, bytes, int, float]:
+    def get(self, key: str, fn: Optional[Callable] = None)\
+            -> Union[str, bytes, int, float]:
         """Gets a value from the cache and optionally converts it
                 to it's original value using the callable argument "fn"
         """
         try:
             data = self._redis.get(key)
-        except:
+        except Exception as e:
             return None
         if fn:
             data = fn(data)
