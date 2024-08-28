@@ -6,7 +6,11 @@ import uuid
 import redis
 from functools import wraps
 
+
 def replay(method):
+    """
+    Print the replay of Cache methods called
+    """
     key = method.__qualname__
     _redis = redis.Redis()
     count = _redis.get(key)
@@ -15,6 +19,7 @@ def replay(method):
     outputs = _redis.lrange(f"{key}:outputs", 0, -1)
     for inz, outz in zip(inputs, outputs):
         print(f"{key}(*{inz.decode('utf-8')}) -> {outz.decode('utf-8')}")
+
 
 def count_calls(method: Callable) -> Callable:
     """
@@ -25,6 +30,7 @@ def count_calls(method: Callable) -> Callable:
         self._redis.incr(method.__qualname__)
         return method(self, *args, **kwargs)
     return wrapper
+
 
 def call_history(method: Callable) -> Callable:
     """
@@ -38,7 +44,6 @@ def call_history(method: Callable) -> Callable:
         self._redis.rpush(f"{key}:outputs", str(output))
         return output
     return wrapper
-
 
 
 class Cache:
